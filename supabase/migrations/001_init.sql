@@ -143,6 +143,7 @@ $$;
 revoke all on function public.claim_clean_export(text, text) from public, anon;
 revoke all on function public.quota_status() from public, anon;
 revoke all on function public.is_pro(uuid) from public, anon;
+revoke all on function public.handle_new_user() from public, anon, authenticated;
 grant execute on function public.claim_clean_export(text, text) to authenticated;
 grant execute on function public.quota_status() to authenticated;
 grant execute on function public.is_pro(uuid) to authenticated;

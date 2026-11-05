@@ -23,7 +23,12 @@ function nextNumber(base: string, run: number) {
   return `${base}-R${run}`;
 }
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
+  // Only the pg_cron job knows this secret (stored in Supabase Vault).
+  const secret = req.headers.get("x-cron-secret") ?? "";
+  const { data: allowed } = await admin.rpc("check_cron_secret", { p: secret });
+  if (!secret || allowed !== true) return new Response("unauthorised", { status: 401 });
+
   const today = new Date().toISOString().slice(0, 10);
   const { data: rules, error } = await admin.from("recurring").select("*").eq("active", true).lte("next_run", today).limit(200);
   if (error) return new Response(error.message, { status: 500 });
