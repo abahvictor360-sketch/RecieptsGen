@@ -10,56 +10,154 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Archivo:wght@400;600;800;900&family=Playfair+Display:wght@700;900&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="ui.css" />
   <style id="pageStyle"></style>
 </head>
 <body>
-  <header class="topbar no-print">
+<div class="app">
+  <!-- ========== Sidebar ========== -->
+  <nav class="side no-print" aria-label="Main">
     <a class="brand" href="./" aria-label="RecieptsGen home">
-      <img src="logo.svg" alt="" width="30" height="30" />
+      <img src="logo.svg" alt="" width="32" height="32" />
       <span class="wordmark">Reciepts<b>Gen</b></span>
     </a>
-    <div class="seg" role="tablist" aria-label="Document type">
-      <button type="button" data-type="invoice" role="tab">Invoice</button>
-      <button type="button" data-type="receipt" role="tab">Receipt</button>
+    <div class="nav seg" role="tablist" aria-label="Document type">
+      <button type="button" class="nav-item" data-type="invoice" role="tab"><span data-ico="FileText"></span><span>Invoices</span></button>
+      <button type="button" class="nav-item" data-type="receipt" role="tab"><span data-ico="Receipt"></span><span>Receipts</span></button>
     </div>
-    <div class="top-actions">
-      <span class="plan-pill" id="planPill" hidden></span>
-      <button type="button" class="btn ghost" id="btnAccount">Sign in</button>
-      <button type="button" class="btn ghost" id="btnNew">New</button>
-      <button type="button" class="btn ghost" id="btnSave">Save</button>
-      <button type="button" class="btn ghost" id="btnConvert">Make receipt</button>
-      <button type="button" class="btn primary" id="btnPdf">Download PDF</button>
+    <div class="nav">
+      <button type="button" class="nav-item" data-jump="secDesign"><span data-ico="Palette"></span><span>Templates</span></button>
+      <button type="button" class="nav-item" data-jump="secSaved"><span data-ico="FolderOpen"></span><span>Saved</span></button>
+      <button type="button" class="nav-item" data-jump="secSettings"><span data-ico="Settings"></span><span>Settings</span></button>
     </div>
-  </header>
+    <div class="side-ad house-ad" id="houseAd">
+      <b>Go Pro</b>
+      <span>Colored templates, cloud sync, email and recurring invoices.</span>
+      <button type="button" class="btn lime small" data-upgrade>Upgrade ₦2,000/mo</button>
+    </div>
+    <div class="nav nav-bottom">
+      <a class="nav-item" href="mailto:hello@recieptsgen.app?subject=RecieptsGen%20help"><span data-ico="CircleHelp"></span><span>Help</span></a>
+      <button type="button" class="nav-item" id="btnAccountSide"><span data-ico="LogIn"></span><span id="sideAccLabel">Sign in</span></button>
+    </div>
+  </nav>
 
-  <main class="layout">
-    <aside class="editor no-print" id="editor">
-      <div class="house-ad" id="houseAd">
-        <div><b>RecieptsGen Pro</b> · colored templates, cloud sync, email to clients, payment links and recurring invoices.</div>
-        <button type="button" class="btn small" data-upgrade>Upgrade for ₦2,000/month</button>
+  <!-- ========== Main ========== -->
+  <div class="main">
+    <header class="head no-print">
+      <h1 id="pageTitle">New Invoice: <b id="pageNum"></b></h1>
+      <div class="head-right">
+        <span class="plan-pill" id="planPill" hidden></span>
+        <button type="button" class="acc-chip" id="btnAccount"><span class="avatar" id="avatar">?</span><span id="accName">Sign in</span><span data-ico="ChevronDown" class="chev"></span></button>
       </div>
+    </header>
 
-      <section class="card">
-        <div class="card-head"><h2>Design</h2><span class="pro-tag" data-pro-hint>PRO for colored</span></div>
-        <div class="tpl-grid" id="tplGrid"></div>
-        <div class="grid2">
-          <label><span>Accent color <span class="pro-mini">PRO</span></span><input type="color" id="f-accent" /></label>
-          <label><span>Font <span class="pro-mini">PRO</span></span><select id="f-font"></select></label>
+    <div class="cols">
+      <!-- ---------- Builder ---------- -->
+      <section class="col-mid no-print" id="editor">
+        <div class="hero">
+          <div class="hero-left">
+            <button type="button" class="icon-btn hero-logo" id="fromLogo" title="Business logo"></button>
+            <div class="hero-id">
+              <input id="f-fromName" class="hero-name" placeholder="Your business name" aria-label="Business name" />
+              <input id="f-fromEmail" class="hero-sub" type="email" placeholder="sales@yourbusiness.com" aria-label="Business email" />
+              <input id="f-fromPhone" class="hero-sub" placeholder="Phone" aria-label="Business phone" />
+            </div>
+          </div>
+          <textarea id="f-fromAddress" class="hero-addr" rows="3" placeholder="Street&#10;City, State&#10;Country" aria-label="Business address"></textarea>
         </div>
-        <div class="card-head">
-          <h3>My templates <span class="pro-mini">PRO</span></h3>
-          <div class="row-actions">
-            <button type="button" class="btn small ghost" id="btnTplNew">New</button>
-            <label class="btn small ghost">Import<input type="file" id="tplImport" accept="application/json" hidden /></label>
+
+        <div class="info">
+          <div>
+            <div class="info-h"><span id="numLabel">Invoice Number</span></div>
+            <input id="f-number" class="flat" aria-label="Document number" />
+            <div class="info-dates">
+              <span>Issued</span><b id="viewIssued"></b>
+              <span class="when-invoice">Due</span><b class="when-invoice" id="viewDue">Not set</b>
+              <span class="when-receipt">Paid</span><b class="when-receipt" id="viewPaid"></b>
+            </div>
+          </div>
+          <div class="info-right">
+            <div class="info-h">Billed to</div>
+            <input id="f-billName" class="flat r" placeholder="Customer name" aria-label="Customer name" />
+            <input id="f-billEmail" class="flat r" type="email" placeholder="customer@email.com" aria-label="Customer email" />
+            <textarea id="f-billExtra" class="flat r" rows="2" placeholder="Address or phone" aria-label="Customer address"></textarea>
           </div>
         </div>
-        <ul class="history" id="myTemplates"></ul>
+
+        <div class="items-block">
+          <div class="blk-h">
+            <div><h2>Item Details</h2><p>Add each product or service. Open an item for more detail.</p></div>
+          </div>
+          <div class="items-head"><span>Item</span><span>Qty</span><span>Rate</span><span>Amount</span><span></span></div>
+          <div id="items"></div>
+          <div class="items-foot">
+            <button type="button" class="link green" id="btnAddItem">+ Add Item</button>
+            <div class="sum">
+              <div class="sum-row"><span>Subtotal</span><b id="sumSub"></b></div>
+              <div class="sum-row"><span>Discount</span><span class="sum-val">
+                <button type="button" class="link green" data-reveal="discountWrap" id="addDiscount">Add</button>
+                <span id="discountWrap" hidden><input id="f-discount" type="number" min="0" step="0.01" placeholder="0.00" aria-label="Discount" /></span></span></div>
+              <div class="sum-row"><span>Tax</span><span class="sum-val">
+                <button type="button" class="link green" data-reveal="taxWrap" id="addTax">Add</button>
+                <span id="taxWrap" hidden><input id="f-taxLabel" placeholder="VAT" aria-label="Tax name" /><input id="f-taxRate" type="number" min="0" step="0.01" placeholder="%" aria-label="Tax percent" /></span></span></div>
+              <div class="sum-row total"><span>Total</span><b id="sumTotal"></b></div>
+            </div>
+          </div>
+        </div>
+
+        <details class="more" open>
+          <summary>Payment</summary>
+          <div class="grid3">
+            <label>Method<input id="f-payMethod" placeholder="Bank transfer" /></label>
+            <label>Reference<input id="f-payRef" /></label>
+            <label>Transaction ID<input id="f-payTxn" placeholder="optional" /></label>
+          </div>
+          <button type="button" class="link green" id="btnRef">Generate reference</button>
+          <label><span>Payment link <span class="pro-mini">PRO</span> <small>(adds a QR code)</small></span><input id="f-payLink" type="url" placeholder="https://flutterwave.com/pay/your-link" /></label>
+        </details>
+
+        <details class="more">
+          <summary>Currency and conversion</summary>
+          <div class="grid3">
+            <label>Currency symbol
+              <input id="f-currency" list="currencies" />
+              <datalist id="currencies">
+                <option value="₦">Naira</option><option value="GH₵">Cedi</option><option value="US$">US dollar</option>
+                <option value="$">Dollar</option><option value="€">Euro</option><option value="£">Pound</option>
+                <option value="KSh">Shilling</option><option value="R">Rand</option><option value="CFA">CFA franc</option>
+              </datalist>
+            </label>
+            <label class="when-receipt">Amount paid <small>(blank = total)</small><input id="f-amountPaid" type="number" min="0" step="0.01" /></label>
+          </div>
+          <label class="check"><input type="checkbox" id="f-fxOn" /> Show approximate conversion</label>
+          <div class="grid3" id="fxFields">
+            <label>Other currency<input id="f-fxSymbol" placeholder="US$" /></label>
+            <label>1 unit equals<input id="f-fxRate" type="number" min="0" step="0.01" placeholder="1365" /></label>
+          </div>
+        </details>
+
+        <details class="more">
+          <summary>Footer note</summary>
+          <textarea id="f-note" rows="2"></textarea>
+          <button type="button" class="link green" id="btnNoteDefault">Use default note</button>
+        </details>
+
+        <details class="more" id="secSettings">
+          <summary>Numbering</summary>
+          <div class="grid3">
+            <label>Number prefix<input id="s-prefix" placeholder="INV" /></label>
+            <label>Next number<input id="s-next" type="number" min="1" step="1" /></label>
+          </div>
+        </details>
       </section>
 
-      <section class="card">
-        <h2>Document</h2>
-        <div class="grid2">
-          <label>Number<input id="f-number" /></label>
+      <!-- ---------- Right column ---------- -->
+      <aside class="col-right no-print">
+        <section class="panel">
+          <div class="panel-h"><h2>Basic Info</h2></div>
+          <label>Invoice date<input type="date" id="f-issued" /></label>
+          <label class="when-invoice">Due date<input type="date" id="f-due" /></label>
+          <label class="when-receipt">Paid on<input type="date" id="f-paid" /></label>
           <label>Status
             <select id="f-status">
               <option value="auto">Auto</option>
@@ -70,146 +168,103 @@
               <option value="">Hide badge</option>
             </select>
           </label>
-          <label>Issued<input type="date" id="f-issued" /></label>
-          <label class="when-receipt">Paid on<input type="date" id="f-paid" /></label>
-          <label class="when-invoice">Due date <small>(optional)</small><input type="date" id="f-due" /></label>
-        </div>
-      </section>
+          <button type="button" class="btn lime big" id="btnEmail">Send <span id="sendWord">Invoice</span></button>
+          <div class="two">
+            <button type="button" class="btn soft" id="btnPreview"><span data-ico="Eye"></span>Preview</button>
+            <button type="button" class="btn soft" id="btnPdf"><span data-ico="Download"></span>Download</button>
+          </div>
+          <div class="two">
+            <button type="button" class="btn ghost" id="btnSave">Save</button>
+            <button type="button" class="btn ghost" id="btnNew">New</button>
+          </div>
+          <button type="button" class="btn ghost" id="btnConvert">Make receipt</button>
+        </section>
 
-      <section class="card">
-        <h2>Your business</h2>
-        <div class="from-row">
-          <button type="button" class="icon-btn" id="fromLogo" title="Business logo"></button>
-          <input id="f-fromName" placeholder="Business name" />
-        </div>
-        <label>Address<textarea id="f-fromAddress" rows="2" placeholder="Street, city"></textarea></label>
-        <div class="grid2">
-          <label>Phone<input id="f-fromPhone" /></label>
-          <label>Email<input id="f-fromEmail" type="email" /></label>
-        </div>
-      </section>
+        <section class="panel" id="secDesign">
+          <div class="panel-h"><h2>Design</h2><span class="pro-tag">PRO for colored</span></div>
+          <div class="tpl-grid" id="tplGrid"></div>
+          <div class="grid2">
+            <label><span>Accent <span class="pro-mini">PRO</span></span><input type="color" id="f-accent" /></label>
+            <label><span>Font <span class="pro-mini">PRO</span></span><select id="f-font"></select></label>
+          </div>
+          <div class="panel-h">
+            <h3>My templates <span class="pro-mini">PRO</span></h3>
+            <div class="row-actions">
+              <button type="button" class="btn small ghost" id="btnTplNew">New</button>
+              <label class="btn small ghost">Import<input type="file" id="tplImport" accept="application/json" hidden /></label>
+            </div>
+          </div>
+          <ul class="history" id="myTemplates"></ul>
+        </section>
 
-      <section class="card">
-        <h2>Billed to</h2>
-        <label>Name<input id="f-billName" placeholder="Customer or company" /></label>
-        <label>Email<input id="f-billEmail" type="email" placeholder="name@example.com" /></label>
-        <label>Extra lines <small>(address, phone)</small><textarea id="f-billExtra" rows="2"></textarea></label>
-      </section>
+        <section class="panel">
+          <div class="panel-h"><h2>Repeat</h2><span class="pro-tag">PRO</span></div>
+          <button type="button" class="btn soft" id="btnRepeat">Repeat this invoice</button>
+          <ul class="history" id="recurringList"></ul>
+        </section>
 
-      <section class="card">
-        <h2>Payment</h2>
-        <label>Method<input id="f-payMethod" placeholder="Bank transfer" /></label>
-        <label>Reference<input id="f-payRef" /></label>
-        <label>Transaction ID <small>(optional)</small><input id="f-payTxn" /></label>
-        <button type="button" class="link" id="btnRef">Generate reference</button>
-        <label><span>Payment link <span class="pro-mini">PRO</span> <small>(adds a QR code)</small></span><input id="f-payLink" type="url" placeholder="https://flutterwave.com/pay/your-link" /></label>
-      </section>
+        <section class="panel" id="secSaved">
+          <div class="panel-h">
+            <h2>Saved documents</h2>
+            <button type="button" class="btn small ghost" id="btnExport">Export</button>
+          </div>
+          <div class="sync-note" id="syncNote"></div>
+          <ul id="history" class="history"></ul>
+          <label class="file-link">Import backup<input type="file" id="fileImport" accept="application/json" hidden /></label>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
 
-      <section class="card">
-        <div class="card-head">
-          <h2>Items</h2>
-          <button type="button" class="btn small" id="btnAddItem">+ Add item</button>
-        </div>
-        <div id="items"></div>
-      </section>
+<!-- ========== Preview (also the print source) ========== -->
+<div class="preview" id="previewWrap" hidden>
+  <div class="preview-bar no-print">
+    <b>Preview</b>
+    <div class="row-actions">
+      <button type="button" class="btn lime small" id="btnPdf2">Download PDF</button>
+      <button type="button" class="btn ghost small" id="btnClosePreview">Close</button>
+    </div>
+  </div>
+  <section class="stage" id="stage">
+    <div class="stage-note no-print" id="stageNote" hidden></div>
+    <div class="stage-inner" id="stageInner">
+      <article class="sheet" id="sheet" aria-label="Document preview"></article>
+    </div>
+  </section>
+</div>
 
-      <section class="card">
-        <h2>Money</h2>
-        <div class="grid2">
-          <label>Currency symbol
-            <input id="f-currency" list="currencies" />
-            <datalist id="currencies">
-              <option value="₦">Naira</option>
-              <option value="GH₵">Cedi</option>
-              <option value="US$">US dollar</option>
-              <option value="$">Dollar</option>
-              <option value="€">Euro</option>
-              <option value="£">Pound</option>
-              <option value="KSh">Shilling</option>
-              <option value="R">Rand</option>
-              <option value="CFA">CFA franc</option>
-            </datalist>
-          </label>
-          <label>Discount<input id="f-discount" type="number" min="0" step="0.01" placeholder="0.00" /></label>
-          <label>Tax label<input id="f-taxLabel" placeholder="VAT" /></label>
-          <label>Tax %<input id="f-taxRate" type="number" min="0" step="0.01" placeholder="0" /></label>
-          <label class="when-receipt">Amount paid <small>(blank = total)</small><input id="f-amountPaid" type="number" min="0" step="0.01" /></label>
-        </div>
-        <label class="check"><input type="checkbox" id="f-fxOn" /> Show approximate conversion</label>
-        <div class="grid2" id="fxFields">
-          <label>Other currency<input id="f-fxSymbol" placeholder="US$" /></label>
-          <label>1 unit equals<input id="f-fxRate" type="number" min="0" step="0.01" placeholder="1365" /></label>
-        </div>
-      </section>
+<div class="toast no-print" id="toast" role="status" aria-live="polite"></div>
 
-      <section class="card">
-        <h2>Footer note</h2>
-        <textarea id="f-note" rows="2"></textarea>
-        <button type="button" class="link" id="btnNoteDefault">Use default note</button>
-      </section>
-
-      <section class="card">
-        <div class="card-head"><h2>Send and repeat</h2><span class="pro-tag">PRO</span></div>
-        <div class="row-actions">
-          <button type="button" class="btn small" id="btnEmail">Email to client</button>
-          <button type="button" class="btn small ghost" id="btnRepeat">Repeat this invoice</button>
-        </div>
-        <ul class="history" id="recurringList"></ul>
-      </section>
-
-      <section class="card">
-        <h2>Settings</h2>
-        <div class="grid2">
-          <label>Number prefix<input id="s-prefix" placeholder="INV" /></label>
-          <label>Next number<input id="s-next" type="number" min="1" step="1" /></label>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card-head">
-          <h2>Saved documents</h2>
-          <button type="button" class="btn small ghost" id="btnExport">Export</button>
-        </div>
-        <div class="sync-note" id="syncNote"></div>
-        <ul id="history" class="history"></ul>
-        <label class="file-link">Import backup<input type="file" id="fileImport" accept="application/json" hidden /></label>
-      </section>
-    </aside>
-
-    <section class="stage" id="stage">
-      <div class="stage-note no-print" id="stageNote" hidden></div>
-      <div class="stage-inner" id="stageInner">
-        <article class="sheet" id="sheet" aria-label="Document preview"></article>
+<template id="tpl-item">
+  <div class="item">
+    <div class="item-row">
+      <div class="cell name"><button type="button" class="icon-btn mini" title="Choose icon"></button><input class="i-name" placeholder="Item or product" aria-label="Item name" /></div>
+      <input class="cell i-qty" type="number" min="0" step="any" aria-label="Quantity" />
+      <input class="cell i-price" type="number" min="0" step="0.01" placeholder="0.00" aria-label="Rate" />
+      <div class="cell amt i-amount"></div>
+      <div class="row-tools">
+        <button type="button" class="tool more-btn" title="More detail" aria-label="More detail" aria-expanded="false">&#8942;</button>
+        <button type="button" class="tool x" title="Remove item" aria-label="Remove item">&times;</button>
       </div>
-    </section>
-  </main>
-
-  <div class="toast no-print" id="toast" role="status" aria-live="polite"></div>
-
-  <template id="tpl-item">
-    <div class="item">
-      <div class="item-top">
-        <button type="button" class="icon-btn" title="Choose icon"></button>
-        <input class="i-name" placeholder="Item or product" />
-        <button type="button" class="x" title="Remove item" aria-label="Remove item">&times;</button>
-      </div>
-      <div class="grid2">
+    </div>
+    <div class="item-more" hidden>
+      <div class="grid3">
         <label>Vendor <small>(after ·)</small><input class="i-vendor" placeholder="optional" /></label>
         <label>Coverage<input class="i-coverage" placeholder="12 months" list="coverages" /></label>
-        <label>Qty<input class="i-qty" type="number" min="0" step="any" /></label>
-        <label>Unit price<input class="i-price" type="number" min="0" step="0.01" /></label>
+        <label>Header label<input class="i-headerLabel" placeholder="Header label" /></label>
       </div>
       <label>Description<textarea class="i-desc" rows="2"></textarea></label>
       <div class="item-foot">
-        <label class="check"><input type="checkbox" class="i-header" /> Logo in header</label>
-        <input class="i-headerLabel" placeholder="Header label" />
+        <label class="check"><input type="checkbox" class="i-header" /> Show logo in header</label>
         <div class="move">
           <button type="button" class="up" title="Move up" aria-label="Move up">&uarr;</button>
           <button type="button" class="down" title="Move down" aria-label="Move down">&darr;</button>
         </div>
       </div>
     </div>
-  </template>
+  </div>
+</template>
 
   <datalist id="coverages">
     <option value="One time"></option>

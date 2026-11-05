@@ -251,6 +251,7 @@
     const stage = $("#stage"), inner = $("#stageInner"), sheet = $("#sheet");
     sheet.style.transform = "";
     const avail = stage.clientWidth - 32;
+    if (avail <= 0) return;
     const w = sheet.offsetWidth, h = sheet.offsetHeight;
     const s = Math.min(1, avail / w);
     sheet.style.transform = s < 1 ? `scale(${s})` : "";
@@ -289,12 +290,33 @@
     paintFromLogo();
     renderItems();
     renderTplGrid();
+    $("#discountWrap").hidden = !num(doc.discount); $("#addDiscount").hidden = !!num(doc.discount);
+    $("#taxWrap").hidden = !num(doc.taxRate); $("#addTax").hidden = !!num(doc.taxRate);
+    paintChrome();
+  }
+
+  // Builder summary: page title, dates, line amounts and totals.
+  function paintChrome() {
+    const c = calc(doc);
+    const sym = doc.currency || "";
+    const word = doc.type === "receipt" ? "Receipt" : "Invoice";
+    $("#pageTitle").firstChild.textContent = `New ${word}: `;
+    $("#pageNum").textContent = doc.number || "";
+    $("#numLabel").textContent = `${word} Number`;
+    $("#sendWord").textContent = word;
+    $("#viewIssued").textContent = fmtDate(doc.issued) || "Not set";
+    $("#viewDue").textContent = fmtDate(doc.due) || "Not set";
+    $("#viewPaid").textContent = fmtDate(doc.paid) || "Not set";
+    $("#sumSub").textContent = money(sym, c.subtotal);
+    $("#sumTotal").textContent = money(sym, c.total);
+    document.querySelectorAll("#items .i-amount").forEach((el, i) => { el.textContent = money(sym, c.lines[i] || 0); });
   }
 
   let saveTimer;
   function changed() {
     doc.updated = Date.now();
     $("#f-note").placeholder = defaultNote(doc);
+    paintChrome();
     renderDoc();
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => store.set(K.current, doc), 250);
@@ -482,12 +504,19 @@
         if (!doc.items.length) doc.items.push(blankItem());
         renderItems(); changed();
       });
+      const moreBtn = $(".more-btn", node), more = $(".item-more", node);
+      moreBtn.addEventListener("click", () => {
+        more.hidden = !more.hidden;
+        moreBtn.setAttribute("aria-expanded", String(!more.hidden));
+        if (!more.hidden) $(".i-vendor", node).focus();
+      });
       $(".up", node).disabled = idx === 0;
       $(".down", node).disabled = idx === doc.items.length - 1;
       $(".up", node).addEventListener("click", () => move(idx, -1));
       $(".down", node).addEventListener("click", () => move(idx, 1));
       wrap.appendChild(node);
     });
+    paintChrome();
   }
   function move(i, dir) {
     const j = i + dir;
@@ -703,7 +732,10 @@
   function paintAccount() {
     const s = A.state;
     const pill = $("#planPill");
-    $("#btnAccount").textContent = s.user ? "Account" : "Sign in";
+    const name = s.user ? String(s.user.email || "").split("@")[0] : "";
+    $("#accName").textContent = s.user ? name : "Sign in";
+    $("#avatar").textContent = s.user ? name.slice(0, 2) : "?";
+    $("#sideAccLabel").textContent = s.user ? "Account" : "Sign in";
     if (s.user) {
       pill.hidden = false;
       pill.className = "plan-pill" + (s.pro ? " pro" : "");
@@ -854,6 +886,30 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
   }
+
+  // ---------- shell controls ----------
+  document.querySelectorAll("[data-ico]").forEach((el) => { el.innerHTML = iconSVG({ kind: "lucide", name: el.dataset.ico }); });
+  document.querySelectorAll("[data-reveal]").forEach((b) => b.addEventListener("click", () => {
+    const wrap = document.getElementById(b.dataset.reveal);
+    wrap.hidden = false; b.hidden = true;
+    const inp = wrap.querySelector('input[type="number"]');
+    if (inp) inp.focus();
+  }));
+  document.querySelectorAll("[data-jump]").forEach((b) => b.addEventListener("click", () => {
+    const el = document.getElementById(b.dataset.jump);
+    if (!el) return;
+    if (el.tagName === "DETAILS") el.open = true;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }));
+  $("#btnAccountSide").addEventListener("click", () => $("#btnAccount").click());
+  const previewWrap = $("#previewWrap");
+  const openPreview = () => { previewWrap.hidden = false; document.body.style.overflow = "hidden"; renderDoc(); };
+  const closePreview = () => { previewWrap.hidden = true; document.body.style.overflow = ""; };
+  $("#btnPreview").addEventListener("click", openPreview);
+  $("#btnClosePreview").addEventListener("click", closePreview);
+  $("#btnPdf2").addEventListener("click", () => $("#btnPdf").click());
+  previewWrap.addEventListener("click", (e) => { if (e.target === previewWrap || e.target.id === "stage") closePreview(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !previewWrap.hidden && !document.querySelector("dialog[open]")) closePreview(); });
 
   // ---------- boot ----------
   fillForm();
