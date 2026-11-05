@@ -26,3 +26,14 @@ npx http-server . -p 5178
 ## Deploy
 
 Static site, no build step. Deployed on Vercel straight from `main`.
+
+## Pro backend (Supabase + Flutterwave + Resend)
+
+- `supabase/migrations/001_init.sql`: tables, row level security, free export quota (2 receipts + 1 invoice per account).
+- `supabase/functions/pay`: Flutterwave checkout, verify and webhook (`?webhook=1`).
+- `supabase/functions/send-email`: emails a document to a client (Pro, 50 a day).
+- `supabase/functions/recurring`: creates repeating invoices, run daily by pg_cron.
+- `config.js`: Supabase URL and publishable key for the browser.
+
+Edge function secrets (Supabase dashboard > Edge Functions > Secrets):
+`FLW_SECRET_KEY`, `FLW_SECRET_HASH`, `RESEND_API_KEY`, `RESEND_FROM`, `APP_URL`, optional `FLW_PLAN_ID`.
