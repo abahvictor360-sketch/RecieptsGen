@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RecieptsGen</title>
+  <meta name="description" content="Create clean invoices and receipts and save them as PDF." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z'/%3E%3Cpath d='M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8'/%3E%3Cpath d='M12 17.5v-11'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar no-print">
+    <div class="brand">
+      <span class="brand-mark" data-icon="receipt"></span>
+      <span>RecieptsGen</span>
+    </div>
+    <div class="seg" role="tablist" aria-label="Document type">
+      <button type="button" data-type="invoice" role="tab">Invoice</button>
+      <button type="button" data-type="receipt" role="tab">Receipt</button>
+    </div>
+    <div class="top-actions">
+      <button type="button" class="btn ghost" id="btnNew">New</button>
+      <button type="button" class="btn ghost" id="btnSave">Save</button>
+      <button type="button" class="btn ghost" id="btnConvert">Make receipt</button>
+      <button type="button" class="btn primary" id="btnPdf">Download PDF</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="editor no-print" id="editor">
+      <section class="card">
+        <h2>Document</h2>
+        <div class="grid2">
+          <label>Number<input id="f-number" /></label>
+          <label>Status
+            <select id="f-status">
+              <option value="auto">Auto</option>
+              <option value="UNPAID">Unpaid</option>
+              <option value="PAID">Paid</option>
+              <option value="PARTIALLY PAID">Partially paid</option>
+              <option value="OVERDUE">Overdue</option>
+              <option value="">Hide badge</option>
+            </select>
+          </label>
+          <label>Issued<input type="date" id="f-issued" /></label>
+          <label class="when-receipt">Paid on<input type="date" id="f-paid" /></label>
+          <label class="when-invoice">Due date <small>(optional)</small><input type="date" id="f-due" /></label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Billed to</h2>
+        <label>Name<input id="f-billName" placeholder="Customer or company" /></label>
+        <label>Email<input id="f-billEmail" type="email" placeholder="name@example.com" /></label>
+        <label>Extra lines <small>(address, phone)</small><textarea id="f-billExtra" rows="2"></textarea></label>
+      </section>
+
+      <section class="card">
+        <h2>Payment</h2>
+        <label>Method<input id="f-payMethod" placeholder="Paystack (bank_transfer)" /></label>
+        <label>Reference<input id="f-payRef" /></label>
+        <label>Transaction ID <small>(optional)</small><input id="f-payTxn" /></label>
+        <button type="button" class="link" id="btnRef">Generate reference</button>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Items</h2>
+          <button type="button" class="btn small" id="btnAddItem">+ Add item</button>
+        </div>
+        <div id="items"></div>
+      </section>
+
+      <section class="card">
+        <h2>Money</h2>
+        <div class="grid2">
+          <label>Currency symbol
+            <input id="f-currency" list="currencies" />
+            <datalist id="currencies">
+              <option value="₦">Naira</option>
+              <option value="GH₵">Cedi</option>
+              <option value="US$">US dollar</option>
+              <option value="$">Dollar</option>
+              <option value="€">Euro</option>
+              <option value="£">Pound</option>
+              <option value="KSh">Shilling</option>
+              <option value="R">Rand</option>
+              <option value="CFA">CFA franc</option>
+            </datalist>
+          </label>
+          <label>Discount<input id="f-discount" type="number" min="0" step="0.01" placeholder="0.00" /></label>
+          <label>Tax label<input id="f-taxLabel" placeholder="VAT" /></label>
+          <label>Tax %<input id="f-taxRate" type="number" min="0" step="0.01" placeholder="0" /></label>
+          <label class="when-receipt">Amount paid <small>(blank = total)</small><input id="f-amountPaid" type="number" min="0" step="0.01" /></label>
+        </div>
+        <label class="check"><input type="checkbox" id="f-fxOn" /> Show approximate conversion</label>
+        <div class="grid2" id="fxFields">
+          <label>Other currency<input id="f-fxSymbol" placeholder="US$" /></label>
+          <label>1 unit equals<input id="f-fxRate" type="number" min="0" step="0.01" placeholder="1365" /></label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Footer note</h2>
+        <textarea id="f-note" rows="2"></textarea>
+        <button type="button" class="link" id="btnNoteDefault">Use default note</button>
+      </section>
+
+      <section class="card">
+        <h2>Settings</h2>
+        <div class="grid2">
+          <label>Number prefix<input id="s-prefix" placeholder="INV" /></label>
+          <label>Next number<input id="s-next" type="number" min="1" step="1" /></label>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Saved documents</h2>
+          <button type="button" class="btn small ghost" id="btnExport">Export</button>
+        </div>
+        <ul id="history" class="history"></ul>
+        <label class="file-link">Import backup<input type="file" id="fileImport" accept="application/json" hidden /></label>
+      </section>
+    </aside>
+
+    <section class="stage" id="stage">
+      <div class="stage-inner" id="stageInner">
+        <article class="sheet" id="sheet" aria-label="Document preview"></article>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast no-print" id="toast" role="status" aria-live="polite"></div>
+
+  <template id="tpl-item">
+    <div class="item">
+      <div class="item-top">
+        <button type="button" class="icon-btn" title="Choose icon"></button>
+        <input class="i-name" placeholder="Item or product" />
+        <button type="button" class="x" title="Remove item" aria-label="Remove item">&times;</button>
+      </div>
+      <div class="grid2">
+        <label>Vendor <small>(after ·)</small><input class="i-vendor" placeholder="optional" /></label>
+        <label>Coverage<input class="i-coverage" placeholder="12 months" list="coverages" /></label>
+        <label>Qty<input class="i-qty" type="number" min="0" step="any" /></label>
+        <label>Unit price<input class="i-price" type="number" min="0" step="0.01" /></label>
+      </div>
+      <label>Description<textarea class="i-desc" rows="2"></textarea></label>
+      <div class="item-foot">
+        <label class="check"><input type="checkbox" class="i-header" /> Logo in header</label>
+        <input class="i-headerLabel" placeholder="Header label" />
+        <div class="move">
+          <button type="button" class="up" title="Move up" aria-label="Move up">&uarr;</button>
+          <button type="button" class="down" title="Move down" aria-label="Move down">&darr;</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <datalist id="coverages">
+    <option value="One time"></option>
+    <option value="1 month"></option>
+    <option value="3 months"></option>
+    <option value="6 months"></option>
+    <option value="12 months"></option>
+    <option value="24 months"></option>
+  </datalist>
+
+  <dialog id="iconDialog" class="no-print">
+    <form method="dialog">
+      <div class="card-head">
+        <h2>Choose icon</h2>
+        <button class="x" value="cancel" aria-label="Close">&times;</button>
+      </div>
+      <div class="icon-grid" id="iconGrid"></div>
+      <div class="icon-upload">
+        <label class="btn small">Upload logo image<input type="file" id="iconFile" accept="image/*" hidden /></label>
+        <button type="button" class="btn small ghost" id="iconNone">No icon</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
