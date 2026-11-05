@@ -113,6 +113,13 @@
             <label>Transaction ID<input id="f-payTxn" placeholder="optional" /></label>
           </div>
           <button type="button" class="link green" id="btnRef">Generate reference</button>
+          <div class="sub-h">Pay to <small>(printed on invoices, kept for your next one)</small></div>
+          <div class="grid3">
+            <label>Bank name<input id="f-bankName" placeholder="e.g. GTBank" autocomplete="off" /></label>
+            <label>Account name<input id="f-bankAccName" placeholder="Your Business Ltd" autocomplete="off" /></label>
+            <label>Account number<input id="f-bankAccNo" inputmode="numeric" placeholder="0123456789" autocomplete="off" /></label>
+          </div>
+          <label><span>Other payment details <small>(SWIFT, sort code, mobile money, PayPal)</small></span><textarea id="f-bankExtra" rows="2" placeholder="SWIFT: GTBINGLA"></textarea></label>
           <label><span>Payment link <span class="pro-mini">PRO</span> <small>(adds a QR code)</small></span><input id="f-payLink" type="url" placeholder="https://flutterwave.com/pay/your-link" /></label>
         </details>
 

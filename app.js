@@ -86,6 +86,7 @@
     d.from = Object.assign({ name: "", address: "", phone: "", email: "", logo: null }, d.from || {});
     d.bill = Object.assign({ name: "", email: "", extra: "" }, d.bill || {});
     d.pay = Object.assign({ method: "", ref: "", txn: "" }, d.pay || {});
+    d.bank = Object.assign({ name: "", accName: "", accNo: "", extra: "" }, d.bank || {});
     d.fx = Object.assign({ on: false, symbol: "US$", rate: "" }, d.fx || {});
     if (!Array.isArray(d.items)) d.items = [blankItem()];
     d.template = d.template || "classic";
@@ -102,6 +103,7 @@
       from: { name: "Your Business", address: "12 Example Street, Lagos", phone: "+234 800 000 0000", email: "hello@yourbusiness.com" },
       bill: { name: "Customer Name", email: "customer@example.com", extra: "" },
       pay: { method: "Bank transfer", ref: randRef(), txn: "" },
+      bank: { name: "Your Bank", accName: "Your Business", accNo: "0123456789", extra: "" },
       currency: "₦", discount: "", taxLabel: "VAT", taxRate: "", amountPaid: "",
       fx: { on: true, symbol: "US$", rate: 1365 }, note: "",
       items: [
@@ -120,6 +122,7 @@
       from: JSON.parse(JSON.stringify(prev.from || {})),
       bill: { name: "", email: "", extra: "" },
       pay: { method: prev.pay?.method || "", ref: randRef(), txn: "" },
+      bank: JSON.parse(JSON.stringify(prev.bank || {})),
       currency: prev.currency || "₦", discount: "", taxLabel: prev.taxLabel || "VAT", taxRate: "", amountPaid: "",
       fx: Object.assign({ on: false, symbol: "US$", rate: "" }, prev.fx || {}),
       note: "", items: [blankItem()],
@@ -196,6 +199,10 @@
 
     const metaRows = [["No.", d.number], ["Issued", fmtDate(d.issued)], isRec ? ["Paid", fmtDate(d.paid)] : d.due ? ["Due", fmtDate(d.due)] : null].filter((x) => x && x[1]);
     const payRows = [["Method", d.pay.method], ["Reference", d.pay.ref], ["Transaction ID", d.pay.txn]].filter((x) => (x[1] || "").trim());
+    // Bank details show on invoices, and on receipts that still have a balance to pay.
+    const showBank = !isRec || (c.paidSet && c.balance > 0.004);
+    const bankRows = showBank ? [["Bank", d.bank.name], ["Account name", d.bank.accName], ["Account number", d.bank.accNo]].filter((x) => (x[1] || "").trim()) : [];
+    const bankExtra = showBank ? (d.bank.extra || "").trim() : "";
 
     const totalRows = [{ label: "Subtotal", value: money(sym, c.subtotal), cls: "sub" }];
     if (c.discount > 0) totalRows.push({ label: "Discount", value: "−" + money(sym, c.discount), cls: "sub" });
@@ -211,7 +218,7 @@
 
     const wm = forceWm !== null ? forceWm : !(A && A.wouldBeClean(d.id, d.type));
     const ctx = {
-      d, c, esc, iconSVG, fmtDate, status, logos, metaRows, payRows, totalRows, fxLine,
+      d, c, esc, iconSVG, fmtDate, status, logos, metaRows, payRows, bankRows, bankExtra, totalRows, fxLine,
       money: (n) => money(sym, n),
       qtyNote: (it) => (it.qty !== "" && num(it.qty) !== 1 ? `<div class="qty">${esc(num(it.qty))} × ${esc(money(sym, num(it.price)))}</div>` : ""),
       qtyNoteInline: (it) => (it.qty !== "" && num(it.qty) !== 1 ? ` <span class="qty">×${esc(num(it.qty))}</span>` : ""),
@@ -267,6 +274,7 @@
     ["#f-fromName", "from.name"], ["#f-fromAddress", "from.address"], ["#f-fromPhone", "from.phone"], ["#f-fromEmail", "from.email"],
     ["#f-billName", "bill.name"], ["#f-billEmail", "bill.email"], ["#f-billExtra", "bill.extra"],
     ["#f-payMethod", "pay.method"], ["#f-payRef", "pay.ref"], ["#f-payTxn", "pay.txn"], ["#f-payLink", "payLink"],
+    ["#f-bankName", "bank.name"], ["#f-bankAccName", "bank.accName"], ["#f-bankAccNo", "bank.accNo"], ["#f-bankExtra", "bank.extra"],
     ["#f-currency", "currency"], ["#f-discount", "discount"], ["#f-taxLabel", "taxLabel"], ["#f-taxRate", "taxRate"],
     ["#f-amountPaid", "amountPaid"], ["#f-fxSymbol", "fx.symbol"], ["#f-fxRate", "fx.rate"], ["#f-note", "note"],
     ["#f-font", "font"],

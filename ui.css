@@ -177,6 +177,9 @@ textarea.flat { resize: none; }
 .more[open] summary::after { content: "–"; }
 .more > label, .more .grid3 label { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
 .more > .check, .more label.check { flex-direction: row; align-items: center; color: var(--ink); }
+.more .sub-h { margin: 14px 0 8px; font-weight: 600; font-size: 13px; color: var(--ink); }
+.more .sub-h small { font-weight: 400; color: var(--muted, #78778b); }
+.more textarea { resize: vertical; font: inherit; }
 .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 12px; }
 #fxFields[hidden] { display: none; }
 

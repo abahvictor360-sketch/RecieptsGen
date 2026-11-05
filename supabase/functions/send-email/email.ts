@@ -49,6 +49,17 @@ export function renderEmail(d: any, message: string, sender: string) {
     )
     .join("");
   const msg = esc(message || "").replace(/\n/g, "<br>");
+  const bank = d.bank ?? {};
+  const bankRows = [["Bank", bank.name], ["Account name", bank.accName], ["Account number", bank.accNo]]
+    .filter((r) => String(r[1] ?? "").trim())
+    .map((r) => `<div><span style="color:#666">${r[0]}:</span> <b>${esc(r[1])}</b></div>`)
+    .join("");
+  const bankExtra = String(bank.extra ?? "").trim();
+  const bankHtml = !isRec && (bankRows || bankExtra)
+    ? `<div style="margin-top:18px;padding:12px 14px;border:1px solid #e5e5e5;border-left:3px solid #111;border-radius:6px;font-size:14px;line-height:1.6">
+        <div style="font-size:12px;letter-spacing:1px;color:#666;margin-bottom:4px">PAY TO</div>${bankRows}
+        ${bankExtra ? `<div style="color:#444">${esc(bankExtra).replace(/\n/g, "<br>")}</div>` : ""}</div>`
+    : "";
   const html = `<!doctype html><html><body style="margin:0;background:#f4f4f5;font-family:Arial,Helvetica,sans-serif;color:#111">
   <div style="max-width:600px;margin:0 auto;padding:24px 12px">
     <div style="background:#fff;border-radius:10px;padding:24px">
@@ -71,6 +82,7 @@ export function renderEmail(d: any, message: string, sender: string) {
         <tr><td style="font-weight:700;font-size:16px;padding-top:8px;border-top:2px solid #111">${isRec ? "Total paid" : "Total due"}</td>
             <td style="font-weight:700;font-size:16px;padding-top:8px;border-top:2px solid #111;text-align:right">${esc(fmt(sym, t.total))}</td></tr>
       </table>
+      ${bankHtml}
       ${payLink && !isRec ? `<p style="margin:20px 0 0;text-align:center"><a href="${esc(payLink)}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600">Pay now</a></p>` : ""}
     </div>
     <p style="text-align:center;color:#999;font-size:12px;margin-top:14px">Sent with RecieptsGen</p>

@@ -291,6 +291,17 @@ dialog .btn.primary { justify-content: center; }
 .t-classic .doc-title { color: var(--acc); }
 .terms { margin-top: 10pt; font-size: 8.7pt; color: #555; }
 .terms .label { margin-bottom: 4pt; }
+.bank { font-size: 8.7pt; line-height: 1.5; color: #333; }
+.bank .bank-k { color: #777; }
+.bank .bank-v { font-weight: 600; color: #000; }
+.bank .bank-x { margin-top: 2pt; color: #555; }
+.bank-h { font-weight: 600; font-size: 9pt; margin-bottom: 3pt; }
+.bank-classic { margin-bottom: 8pt; padding: 8pt 10pt; border: 1px solid #e3e3e3; border-left: 3px solid var(--acc); border-radius: 3pt; max-width: 230pt; }
+.bank-classic .bank-h { font-size: 7.5pt; letter-spacing: .08em; text-transform: uppercase; color: #777; }
+.bank-warm { margin-top: 8pt; }
+.bank-warm .bank-h { color: var(--acc); }
+.bank-bold { margin: 6pt 0; }
+.bank-bold .bank-h { color: var(--acc); text-transform: uppercase; letter-spacing: .06em; font-size: 8pt; }
 
 /* ---------- Till slip ---------- */
 .sheet.page-thermal { width: 80mm; min-height: 0; }

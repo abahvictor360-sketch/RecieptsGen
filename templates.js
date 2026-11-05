@@ -41,6 +41,14 @@
     return `<div class="paybox"><div class="qr">${qrSVG(x.payLink)}</div>
       <div><div class="pay-h">Pay online</div><div class="pay-u">${esc(x.payLink.replace(/^https:\/\//, ""))}</div></div></div>`;
   }
+  // "Pay to" bank details. cls picks the template's styling.
+  function bankBlock(x, cls, heading) {
+    if (!x.bankRows.length && !x.bankExtra) return "";
+    const esc = x.esc;
+    return `<div class="bank ${cls}">${heading ? `<div class="bank-h">${esc(heading)}</div>` : ""}${x.bankRows
+      .map((r) => `<div class="bank-r"><span class="bank-k">${r[0]}</span> <span class="bank-v">${esc(r[1])}</span></div>`)
+      .join("")}${x.bankExtra ? `<div class="bank-x pre">${esc(x.bankExtra)}</div>` : ""}</div>`;
+  }
   const watermark = (x) => (x.wm ? `<div class="wm">Made with RecieptsGen &middot; recieptsgen.vercel.app</div>` : "");
   const bg = (x) => (x.bg ? `<img class="tpl-bg" src="${x.esc(x.bg)}" alt="" style="opacity:${x.bgOpacity}" />` : "");
   const fromBlock = (x, cls) => {
@@ -99,7 +107,7 @@
         <tbody>${rows}</tbody>
       </table>
       <div class="bottom">
-        <div class="bottom-left">${payBlock(x)}${x.terms ? `<div class="terms"><div class="label">Terms</div><div class="pre">${esc(x.terms)}</div></div>` : ""}</div>
+        <div class="bottom-left">${bankBlock(x, "bank-classic", "Pay to")}${payBlock(x)}${x.terms ? `<div class="terms"><div class="label">Terms</div><div class="pre">${esc(x.terms)}</div></div>` : ""}</div>
         <div class="totals">${x.totalRows.map((r) => `<div class="trow ${r.cls}"><span>${esc(r.label)}</span><span>${esc(r.value)}</span></div>`).join("")}${x.fxLine ? `<div class="fx">${esc(x.fxLine)}</div>` : ""}</div>
       </div>
       ${x.note ? `<div class="doc-foot">${esc(x.note)}</div>` : ""}
@@ -133,6 +141,7 @@
       <div class="th-dash"></div>
       ${info.map((r) => `<div class="th-row"><span>${r[0]}</span><span>${esc(r[1])}</span></div>`).join("")}
       <div class="th-dash"></div>
+      ${x.bankRows.length || x.bankExtra ? `${x.bankRows.map((r) => `<div class="th-row"><span>${r[0]}</span><span>${esc(r[1])}</span></div>`).join("")}${x.bankExtra ? `<div class="th-fx pre">${esc(x.bankExtra)}</div>` : ""}<div class="th-dash"></div>` : ""}
       <div class="th-thanks">${esc(x.thanks)}</div>
       ${payBlock(x)}
       <div class="th-bar">${barcodeSVG(d.number, 40)}</div>
@@ -186,6 +195,7 @@
           <div class="w-terms-h">Terms and Conditions</div>
           <div class="pre">${esc(x.terms || x.note || "Payment is due on receipt of this document.")}</div>
           ${x.payRows.length ? `<div class="w-pay">${x.payRows.map((r) => `<div><b>${r[0]}:</b> ${esc(r[1])}</div>`).join("")}</div>` : ""}
+          ${bankBlock(x, "bank-warm", "Pay to")}
           ${payBlock(x)}
         </div>
         <div class="w-totals">
@@ -229,6 +239,7 @@
         <div class="b-left">
           ${extraRows.length > 1 || x.fxLine ? `<div class="b-extra">${extraRows.map((r) => `<div><span>${esc(r.label)}</span><span>${esc(r.value)}</span></div>`).join("")}${x.fxLine ? `<div class="b-fx">${esc(x.fxLine)}</div>` : ""}</div>` : ""}
           ${x.payRows.length ? `<div class="b-pay">${x.payRows.map((r) => `${r[0]}: ${esc(r[1])}`).join(" &nbsp;·&nbsp; ")}</div>` : ""}
+          ${bankBlock(x, "bank-bold", "Pay to")}
           ${payBlock(x)}
           <div class="b-note">${esc(x.note || "")}</div>
         </div>
