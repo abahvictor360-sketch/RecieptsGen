@@ -11,7 +11,8 @@
       try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
     },
   };
-  const K = { current: "rg.current", docs: "rg.docs", settings: "rg.settings" };
+  try { localStorage.removeItem("rg.current"); } catch {}
+  const K = { current: "rg.current.v2", docs: "rg.docs", settings: "rg.settings" };
 
   // ---------- small utils ----------
   const $ = (s, el = document) => el.querySelector(s);
@@ -122,9 +123,6 @@
   let doc = null;
   let docs = store.get(K.docs, []);
   doc = store.get(K.current, null);
-  // Drop the old personal sample draft from browsers that loaded the first version.
-  const oldSample = doc && doc.bill && doc.bill.email === "xpelbeauty001@gmail.com" && !docs.some((x) => x.id === doc.id);
-  if (oldSample) doc = null;
   if (!doc || !Array.isArray(doc.items)) {
     doc = sampleDoc();
     settings.next += 1;
