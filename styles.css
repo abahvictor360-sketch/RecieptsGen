@@ -115,7 +115,7 @@ body[data-type="receipt"] .when-invoice { display: none; }
 #fxFields[hidden] { display: none; }
 
 /* ---------- stage / preview ---------- */
-.stage { padding: 24px 16px 48px; overflow: auto; max-height: calc(100vh - 57px); }
+.stage { padding: 24px 16px 48px; overflow-y: auto; overflow-x: hidden; max-height: calc(100vh - 57px); }
 .stage-inner { margin: 0 auto; transform-origin: top left; }
 .sheet {
   width: 612pt; min-height: 792pt;

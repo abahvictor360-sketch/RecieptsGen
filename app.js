@@ -78,18 +78,18 @@
       issued: today(),
       paid: today(),
       due: "",
-      bill: { name: "Xpel beauty", email: "xpelbeauty001@gmail.com", extra: "" },
-      pay: { method: "Flutterwave", ref: randRef(), txn: "" },
+      bill: { name: "Customer Name", email: "customer@example.com", extra: "" },
+      pay: { method: "Bank transfer", ref: randRef(), txn: "" },
       currency: "₦",
       discount: "",
       taxLabel: "VAT",
       taxRate: "",
       amountPaid: "",
       fx: { on: true, symbol: "US$", rate: 1365 },
-      note: "This invoice is payable online by Flutterwave or Paystack.",
+      note: "",
       items: [
-        { id: uid(), icon: { kind: "lucide", name: "Zap*" }, name: "Supabase Pro", vendor: "", desc: "Central database and secure sign-in used by the website, Xpel POS and Xtend.", coverage: "12 months", qty: 1, price: 409500, inHeader: true, headerLabel: "Supabase" },
-        { id: uid(), icon: { kind: "lucide", name: "MonitorUp" }, name: "Website deployment", vendor: "", desc: "One-off launch of the website on the server, optimised to be found on search engines and AI answers.", coverage: "One time", qty: 1, price: 350000, inHeader: true, headerLabel: "Website deployment" },
+        { id: uid(), icon: { kind: "lucide", name: "Package" }, name: "Product or service", vendor: "", desc: "Short description of what the customer is paying for.", coverage: "12 months", qty: 1, price: 100000, inHeader: true, headerLabel: "Product" },
+        { id: uid(), icon: { kind: "lucide", name: "Wrench" }, name: "Setup service", vendor: "", desc: "One-off setup or installation work.", coverage: "One time", qty: 1, price: 50000, inHeader: true, headerLabel: "Service" },
       ],
       updated: Date.now(),
     };
@@ -122,6 +122,9 @@
   let doc = null;
   let docs = store.get(K.docs, []);
   doc = store.get(K.current, null);
+  // Drop the old personal sample draft from browsers that loaded the first version.
+  const oldSample = doc && doc.bill && doc.bill.email === "xpelbeauty001@gmail.com" && !docs.some((x) => x.id === doc.id);
+  if (oldSample) doc = null;
   if (!doc || !Array.isArray(doc.items)) {
     doc = sampleDoc();
     settings.next += 1;
@@ -152,7 +155,7 @@
   function defaultNote(d) {
     if (d.type === "receipt") return "Thank you, your payment has been received.";
     const m = (d.pay.method || "").trim();
-    return m ? `This invoice is payable online by ${m}.` : "Thank you for your business.";
+    return m ? `Please make payment via ${m}.` : "Thank you for your business.";
   }
 
   // ---------- render document ----------
@@ -314,7 +317,7 @@
   function setType(type) {
     const oldDefault = defaultNote(doc);
     doc.type = type;
-    if (!doc.note || doc.note.trim() === oldDefault || /^This invoice is payable|^Thank you, your payment/.test(doc.note)) doc.note = "";
+    if (!doc.note || doc.note.trim() === oldDefault || /^This invoice is payable|^Please make payment via|^Thank you, your payment/.test(doc.note)) doc.note = "";
     if (type === "receipt" && !doc.paid) doc.paid = today();
     fillForm();
     changed();
