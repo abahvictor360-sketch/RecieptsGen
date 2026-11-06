@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>RecieptsGen Admin</title>
+  <link rel="icon" type="image/svg+xml" href="logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="ui.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+<div class="adm">
+  <nav class="side" aria-label="Admin">
+    <a class="brand" href="./" aria-label="Back to RecieptsGen">
+      <img src="logo.svg" alt="" width="32" height="32" />
+      <span class="wordmark">Reciepts<b>Gen</b></span>
+    </a>
+    <div class="adm-tag">Admin</div>
+    <div class="nav" id="admNav" hidden>
+      <button type="button" class="nav-item" data-view="overview"><span data-ico="LayoutDashboard"></span><span>Overview</span></button>
+      <button type="button" class="nav-item" data-view="users"><span data-ico="Users"></span><span>Users</span></button>
+      <button type="button" class="nav-item" data-view="payments"><span data-ico="CreditCard"></span><span>Payments</span></button>
+      <button type="button" class="nav-item" data-view="activity"><span data-ico="Activity"></span><span>Activity</span></button>
+      <button type="button" class="nav-item" data-view="admins"><span data-ico="ShieldCheck"></span><span>Admins</span></button>
+    </div>
+    <div class="side-foot">
+      <a class="nav-item" href="./"><span data-ico="ArrowLeft"></span><span>Back to app</span></a>
+      <button type="button" class="nav-item" id="btnSignOut" hidden><span data-ico="LogOut"></span><span>Sign out</span></button>
+    </div>
+  </nav>
+
+  <main class="adm-main">
+    <header class="adm-head">
+      <h1 id="viewTitle">Admin</h1>
+      <div class="adm-head-r">
+        <span class="who" id="who"></span>
+        <button type="button" class="btn ghost" id="btnRefresh" hidden><span data-ico="RefreshCw"></span><span>Refresh</span></button>
+      </div>
+    </header>
+
+    <!-- Sign in / blocked -->
+    <section class="gate" id="gate">
+      <div class="card gate-card">
+        <h2>Admin sign in</h2>
+        <p class="muted" id="gateMsg">Sign in with an admin account.</p>
+        <form id="signInForm" autocomplete="on">
+          <label>Email<input id="g-email" type="email" required autocomplete="username" /></label>
+          <label>Password<input id="g-pass" type="password" required autocomplete="current-password" /></label>
+          <button class="btn primary" type="submit">Sign in</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Overview -->
+    <section class="view" id="v-overview" hidden>
+      <div class="stats" id="stats"></div>
+      <div class="charts">
+        <div class="card"><div class="card-h">New users, last 30 days</div><div class="chart" id="chSignups"></div></div>
+        <div class="card"><div class="card-h">Revenue, last 30 days</div><div class="chart" id="chRevenue"></div></div>
+      </div>
+    </section>
+
+    <!-- Users -->
+    <section class="view" id="v-users" hidden>
+      <div class="toolbar">
+        <input id="uSearch" type="search" placeholder="Search by email" aria-label="Search users" />
+        <div class="chips" role="group" aria-label="Filter users">
+          <button type="button" class="chip" data-ufilter="all">All</button>
+          <button type="button" class="chip" data-ufilter="pro">Pro</button>
+          <button type="button" class="chip" data-ufilter="free">Free</button>
+        </div>
+      </div>
+      <div class="card table-card">
+        <table class="tbl">
+          <thead><tr><th>Email</th><th>Joined</th><th>Last sign in</th><th>Plan</th><th class="r">Free exports</th><th class="r">Synced docs</th><th class="r">Paid</th><th></th></tr></thead>
+          <tbody id="uRows"></tbody>
+        </table>
+      </div>
+      <div class="pager" id="uPager"></div>
+    </section>
+
+    <!-- Payments -->
+    <section class="view" id="v-payments" hidden>
+      <div class="toolbar">
+        <div class="chips" role="group" aria-label="Filter payments">
+          <button type="button" class="chip" data-pfilter="all">All</button>
+          <button type="button" class="chip" data-pfilter="successful">Successful</button>
+          <button type="button" class="chip" data-pfilter="pending">Pending</button>
+        </div>
+      </div>
+      <div class="card table-card">
+        <table class="tbl">
+          <thead><tr><th>Reference</th><th>Customer</th><th class="r">Amount</th><th>Status</th><th>Started</th><th>Paid</th><th>Flutterwave ID</th></tr></thead>
+          <tbody id="pRows"></tbody>
+        </table>
+      </div>
+      <div class="pager" id="pPager"></div>
+    </section>
+
+    <!-- Activity -->
+    <section class="view" id="v-activity" hidden>
+      <div class="charts">
+        <div class="card table-card"><div class="card-h pad">Admin actions</div>
+          <table class="tbl"><thead><tr><th>When</th><th>Admin</th><th>Action</th><th>Details</th></tr></thead><tbody id="logRows"></tbody></table></div>
+        <div class="card table-card"><div class="card-h pad">Emails sent to clients</div>
+          <table class="tbl"><thead><tr><th>When</th><th>From user</th><th>To</th></tr></thead><tbody id="mailRows"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- Admins -->
+    <section class="view" id="v-admins" hidden>
+      <div class="card narrow">
+        <div class="card-h">People with admin access</div>
+        <ul class="admins" id="adminList"></ul>
+        <form id="addAdminForm" class="inline-form">
+          <input id="newAdmin" type="email" placeholder="email@example.com" required aria-label="New admin email" />
+          <button class="btn primary" type="submit">Add admin</button>
+        </form>
+        <p class="muted small">They must sign up in RecieptsGen with this email and confirm it before they can open this page.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Manage one user -->
+<dialog id="userDialog" class="dlg">
+  <form method="dialog" class="dlg-body" id="userForm">
+    <h3 id="udEmail"></h3>
+    <div class="ud-meta" id="udMeta"></div>
+    <label>Give Pro for
+      <select id="udDays">
+        <option value="7">7 days</option>
+        <option value="30" selected>30 days</option>
+        <option value="90">90 days</option>
+        <option value="365">1 year</option>
+      </select>
+    </label>
+    <div class="dlg-actions">
+      <button type="button" class="btn primary" id="udGrant">Give Pro</button>
+      <button type="button" class="btn ghost danger" id="udEnd">End Pro now</button>
+      <button type="button" class="btn ghost" id="udReset">Reset free exports</button>
+    </div>
+    <div class="dlg-actions end"><button class="btn ghost" value="close">Close</button></div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
