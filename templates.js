@@ -77,7 +77,7 @@
             ${it.desc ? `<div class="prod-desc">${esc(it.desc)}</div>` : ""}
           </div>
         </div></td>
-        <td class="cov">${esc(it.coverage)}${x.qtyNote(it)}</td>
+        ${x.showCoverage ? `<td class="cov">${esc(it.coverage)}${x.qtyNote(it)}</td>` : ""}
         <td class="amt">${x.money(c.lines[i])}</td>
       </tr>`).join("");
     return `<div class="doc t-classic">
@@ -95,7 +95,7 @@
       </div>
       <div class="parties">
         <div>
-          <div class="label">Billed to</div>
+          ${d.bill.name || d.bill.email || d.bill.extra ? `<div class="label">Billed to</div>` : ""}
           ${d.bill.name ? `<div class="kv party-name">${esc(d.bill.name)}</div>` : ""}
           ${d.bill.email ? `<div class="kv">${esc(d.bill.email)}</div>` : ""}
           ${d.bill.extra ? `<div class="kv pre">${esc(d.bill.extra)}</div>` : ""}
@@ -103,7 +103,7 @@
         <div>${x.payRows.length ? `<div class="label">Payment</div>${x.payRows.map((r) => `<div class="kv"><span class="muted">${r[0]}</span> ${esc(r[1])}</div>`).join("")}` : ""}</div>
       </div>
       <table class="items">
-        <thead><tr><th class="num">#</th><th>Item or product</th><th class="cov">Coverage</th><th class="amt">Amount</th></tr></thead>
+        <thead><tr><th class="num">#</th><th>Item or product</th>${x.showCoverage ? `<th class="cov">Coverage</th>` : ""}<th class="amt">Amount</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
       <div class="bottom">
@@ -178,11 +178,11 @@
       </div>
       <div class="w-parties">
         <div>
-          <div class="w-brand"><span class="w-glyph">${brandGlyph(x)}</span><span>${esc(f.name || "Your Business")}</span></div>
+          <div class="w-brand"><span class="w-glyph">${brandGlyph(x)}</span><span>${esc(f.name || "")}</span></div>
           <div class="w-addr">${[...lines(f.address), f.phone, f.email].filter(Boolean).map((r) => `<div>${esc(r)}</div>`).join("")}</div>
         </div>
         <div>
-          <div class="w-to-label">To:</div>
+          ${d.bill.name || d.bill.email || d.bill.extra ? `<div class="w-to-label">To:</div>` : ""}
           <div class="w-to">${d.bill.name ? `<b>${esc(d.bill.name)}</b>` : ""}${d.bill.email ? `<div>${esc(d.bill.email)}</div>` : ""}${d.bill.extra ? `<div class="pre">${esc(d.bill.extra)}</div>` : ""}</div>
         </div>
       </div>
@@ -192,8 +192,8 @@
       </table>
       <div class="w-bottom">
         <div class="w-terms">
-          <div class="w-terms-h">Terms and Conditions</div>
-          <div class="pre">${esc(x.terms || x.note || "Payment is due on receipt of this document.")}</div>
+          ${x.terms || x.note ? `<div class="w-terms-h">Terms and Conditions</div>
+          <div class="pre">${esc(x.terms || x.note)}</div>` : ""}
           ${x.payRows.length ? `<div class="w-pay">${x.payRows.map((r) => `<div><b>${r[0]}:</b> ${esc(r[1])}</div>`).join("")}</div>` : ""}
           ${bankBlock(x, "bank-warm", "Pay to")}
           ${payBlock(x)}
@@ -222,14 +222,11 @@
     const grand = x.totalRows.find((r) => r.cls === "grand");
     return `<div class="doc t-bold">
       ${bg(x)}
-      <div class="b-name">${esc(f.name || "YOUR BUSINESS")}</div>
+      ${f.name ? `<div class="b-name">${esc(f.name)}</div>` : ""}
       <div class="b-addr">${[...lines(f.address), f.phone, f.email].filter(Boolean).map((r) => `<div>${esc(r)}</div>`).join("")}</div>
       <div class="b-sub">${esc(x.title)} No. ${esc(d.number)}${x.status ? ` &middot; ${esc(x.status)}` : ""}</div>
       <div class="b-fields">
-        <div class="b-f wide"><label>Sold to:</label><div class="b-box">${esc(d.bill.name)}</div></div>
-        <div class="b-f"><label>Date:</label><div class="b-box">${esc(x.fmtDate(d.issued))}</div></div>
-        <div class="b-f wide"><label>Address:</label><div class="b-box">${esc(lines(d.bill.extra).join(", "))}</div></div>
-        <div class="b-f"><label>Contact:</label><div class="b-box">${esc(d.bill.email)}</div></div>
+        ${[["Sold to:", d.bill.name, "wide"], ["Date:", x.fmtDate(d.issued), ""], ["Address:", lines(d.bill.extra).join(", "), "wide"], ["Contact:", d.bill.email, ""]].filter((r) => String(r[1] || "").trim()).map((r) => `<div class="b-f ${r[2]}"><label>${r[0]}</label><div class="b-box">${esc(r[1])}</div></div>`).join("")}
       </div>
       <table class="b-table">
         <thead><tr><th class="c">Qty</th><th>Description</th><th>Price</th><th>Amount</th></tr></thead>

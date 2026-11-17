@@ -93,6 +93,7 @@
     d.accent = d.accent || "";
     d.font = d.font || "";
     d.payLink = d.payLink || "";
+    if (d.showCoverage === undefined) d.showCoverage = true;
     return d;
   }
 
@@ -223,7 +224,8 @@
       qtyNote: (it) => (it.qty !== "" && num(it.qty) !== 1 ? `<div class="qty">${esc(num(it.qty))} × ${esc(money(sym, num(it.price)))}</div>` : ""),
       qtyNoteInline: (it) => (it.qty !== "" && num(it.qty) !== 1 ? ` <span class="qty">×${esc(num(it.qty))}</span>` : ""),
       title: (cu.title || (isRec ? "RECEIPT" : "INVOICE")).toUpperCase(),
-      note: (d.note || "").trim() || defaultNote(d),
+      note: (d.note || "").trim(),
+      showCoverage: d.showCoverage !== false,
       thanks: cu.thanks || "Thank You!",
       terms: cu.terms || "",
       showLogos: cu.showLogos !== false,
@@ -288,6 +290,7 @@
     bind.forEach(([sel, path]) => { $(sel).value = getPath(doc, path) ?? ""; });
     $("#f-accent").value = resolveTpl(doc).accent;
     $("#f-fxOn").checked = !!doc.fx.on;
+    $("#f-showCoverage").checked = doc.showCoverage !== false;
     $("#fxFields").hidden = !doc.fx.on;
     $("#f-note").placeholder = defaultNote(doc);
     $("#s-prefix").value = settings.prefix;
@@ -336,7 +339,8 @@
   $("#f-accent").addEventListener("input", (e) => { doc.accent = e.target.value; changed(); });
   $("#f-fxOn").addEventListener("change", (e) => { doc.fx.on = e.target.checked; $("#fxFields").hidden = !doc.fx.on; changed(); });
   $("#btnRef").addEventListener("click", () => { doc.pay.ref = randRef(); $("#f-payRef").value = doc.pay.ref; changed(); });
-  $("#btnNoteDefault").addEventListener("click", () => { doc.note = ""; $("#f-note").value = ""; changed(); });
+  $("#btnNoteDefault").addEventListener("click", () => { doc.note = defaultNote(doc); $("#f-note").value = doc.note; changed(); });
+  $("#f-showCoverage").addEventListener("change", (e) => { doc.showCoverage = e.target.checked; changed(); });
   $("#s-prefix").addEventListener("input", (e) => { settings.prefix = e.target.value.trim(); store.set(K.settings, settings); });
   $("#s-next").addEventListener("input", (e) => { settings.next = Math.max(1, parseInt(e.target.value, 10) || 1); store.set(K.settings, settings); });
 
